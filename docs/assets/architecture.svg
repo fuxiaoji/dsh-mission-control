@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560" role="img" aria-label="dsh-mission-control architecture: user, secretary, commander, workers, and the Mission Control panel">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B0F17"/>
+      <stop offset="1" stop-color="#0E1421"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4D6BFE"/>
+      <stop offset="1" stop-color="#7CE7FF"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4D6BFE"/>
+    </marker>
+    <marker id="arrowMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5A657C"/>
+    </marker>
+  </defs>
+
+  <rect width="1000" height="560" fill="url(#bg)"/>
+  <g stroke="#1A2233" stroke-width="1">
+    <path d="M0 140 H1000 M0 280 H1000 M0 420 H1000"/>
+    <path d="M250 0 V560 M500 0 V560 M750 0 V560"/>
+  </g>
+
+  <!-- user -->
+  <rect x="48" y="28" width="300" height="54" rx="14" fill="#1B2233" stroke="#2A3450"/>
+  <text x="66" y="50" fill="#8B94A7" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="11" letter-spacing="1.2">USER</text>
+  <text x="66" y="70" fill="#E6E9F0" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="14">让 agent 把这件事做完</text>
+
+  <!-- secretary -->
+  <rect x="48" y="118" width="300" height="104" rx="16" fill="#141926" stroke="#2C3550"/>
+  <rect x="48" y="118" width="4" height="104" rx="2" fill="url(#accent)"/>
+  <text x="68" y="146" fill="#E6E9F0" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="17" font-weight="600">秘书 · Secretary</text>
+  <text x="68" y="170" fill="#8B94A7" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="12.5">只说人话：翻译需求、汇报进展</text>
+  <text x="68" y="190" fill="#5A657C" font-family="ui-monospace, Menlo, monospace" font-size="11">dispatch · mission_status · send_message</text>
+  <text x="68" y="208" fill="#5A657C" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="11">零工作工具：没有 shell / 文件 / 网络</text>
+
+  <!-- commander -->
+  <rect x="48" y="262" width="300" height="104" rx="16" fill="#141926" stroke="#2C3550"/>
+  <rect x="48" y="262" width="4" height="104" rx="2" fill="#7CE7FF"/>
+  <text x="68" y="290" fill="#E6E9F0" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="17" font-weight="600">指挥官 · Commander</text>
+  <text x="68" y="314" fill="#8B94A7" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="12.5">只拆解、派工、验收</text>
+  <text x="68" y="334" fill="#5A657C" font-family="ui-monospace, Menlo, monospace" font-size="11">subagent · workflow · todo</text>
+  <text x="68" y="352" fill="#5A657C" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="11">保留工具只为了核对证据</text>
+
+  <!-- workers -->
+  <rect x="48" y="406" width="300" height="118" rx="16" fill="#111725" stroke="#232B3D"/>
+  <text x="68" y="430" fill="#8B94A7" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="11" letter-spacing="1.2">WORKERS ×N</text>
+  <g font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="12.5" fill="#C9CFDC">
+    <circle cx="74" cy="450" r="4" fill="#4D6BFE"/>
+    <text x="88" y="454">worker: 调研</text>
+    <circle cx="74" cy="476" r="4" fill="#35C77B"/>
+    <text x="88" y="480">worker: 实现</text>
+    <circle cx="74" cy="502" r="4" fill="#4D6BFE"/>
+    <text x="88" y="506">worker: 跑测试与验收</text>
+  </g>
+
+  <!-- arrows in the left column -->
+  <g stroke="#4D6BFE" stroke-width="1.6" fill="none">
+    <path d="M198 82 V112" marker-end="url(#arrow)"/>
+    <path d="M198 222 V256" marker-end="url(#arrow)"/>
+    <path d="M198 366 V400" marker-end="url(#arrow)"/>
+  </g>
+  <text x="210" y="102" fill="#7C87A0" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="11">brief / 简报</text>
+  <text x="210" y="244" fill="#7C87A0" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="11">dispatch</text>
+  <text x="210" y="388" fill="#7C87A0" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="11">subagent</text>
+
+  <!-- feedback dashed lines -->
+  <g stroke="#5A657C" stroke-width="1.2" stroke-dasharray="4 4" fill="none">
+    <path d="M264 400 V370" marker-end="url(#arrowMuted)"/>
+    <path d="M318 256 V228" marker-end="url(#arrowMuted)"/>
+  </g>
+  <text x="272" y="392" fill="#5A657C" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="10">结果 + 证据</text>
+  <text x="326" y="244" fill="#5A657C" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="10">验收报告</text>
+
+  <!-- panel -->
+  <rect x="470" y="28" width="482" height="496" rx="18" fill="#101624" stroke="#2A3450"/>
+  <text x="494" y="58" fill="#8B94A7" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="11" letter-spacing="1.2">MISSION CONTROL · READ-ONLY</text>
+  <text x="494" y="84" fill="#E6E9F0" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="600">任务大厅</text>
+
+  <!-- mini panel -->
+  <rect x="494" y="102" width="434" height="66" rx="12" fill="#161D2E" stroke="#242E45"/>
+  <circle cx="514" cy="126" r="5" fill="#4D6BFE"/>
+  <text x="530" y="130" fill="#E6E9F0" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="12.5">指挥官运行中 · 3 个工人 · 03:12</text>
+  <rect x="514" y="144" width="120" height="6" rx="3" fill="#26314B"/>
+  <rect x="514" y="144" width="72" height="6" rx="3" fill="url(#accent)"/>
+
+  <g font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="11.5" fill="#8B94A7">
+    <rect x="494" y="184" width="434" height="1" fill="#242E45"/>
+    <text x="494" y="208">总任务 4</text>
+    <text x="574" y="208">在跑 2</text>
+    <text x="654" y="208">已用 03:12</text>
+    <text x="754" y="208">汇报间隔 120s</text>
+
+    <circle cx="500" cy="238" r="3.5" fill="#4D6BFE"/>
+    <text x="512" y="242" fill="#C9CFDC">commander · pwsh</text>
+    <circle cx="500" cy="262" r="3.5" fill="#35C77B"/>
+    <text x="512" y="266" fill="#C9CFDC">worker: 调研 · read</text>
+    <circle cx="500" cy="286" r="3.5" fill="#4D6BFE"/>
+    <text x="512" y="290" fill="#C9CFDC">worker: 实现 · write</text>
+    <circle cx="500" cy="310" r="3.5" fill="#4D6BFE"/>
+    <text x="512" y="314" fill="#C9CFDC">worker: 跑测试与验收 · pwsh</text>
+
+    <rect x="494" y="334" width="434" height="1" fill="#242E45"/>
+    <text x="494" y="358" font-size="10" letter-spacing="1.2">TIMELINE</text>
+    <text x="494" y="380" font-family="ui-monospace, Menlo, monospace" font-size="10.5">21:39:12  end      worker: 调研</text>
+    <text x="494" y="400" font-family="ui-monospace, Menlo, monospace" font-size="10.5">21:37:31  start    worker: 实现</text>
+    <text x="494" y="420" font-family="ui-monospace, Menlo, monospace" font-size="10.5">21:36:04  dispatch 秘书下单</text>
+  </g>
+
+  <rect x="494" y="446" width="434" height="58" rx="12" fill="#0C1220" stroke="#1E2739"/>
+  <text x="510" y="470" fill="#5A657C" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="11">数据来源：session 日志 · subagent 目录 · agent 状态</text>
+  <text x="510" y="490" fill="#5A657C" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="11">不改写、不指挥、不落库（HTTP 只读快照）</text>
+
+  <!-- secretary <-> panel -->
+  <g stroke="#4D6BFE" stroke-width="1.4" fill="none" opacity="0.9">
+    <path d="M348 160 H460" marker-end="url(#arrow)"/>
+  </g>
+  <text x="356" y="152" fill="#7C87A0" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="10.5">只读快照</text>
+  <g stroke="#7CE7FF" stroke-width="1.4" fill="none" opacity="0.9">
+    <path d="M460 202 H356" marker-end="url(#arrow)"/>
+  </g>
+  <text x="356" y="220" fill="#7CE7FF" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="10.5">每 120s 唤醒汇报</text>
+
+  <!-- title -->
+  <text x="48" y="548" fill="#3E475C" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="10.5" letter-spacing="1.6">DSH-MISSION-CONTROL · THREE TIERS, ONE MISSION</text>
+</svg>

@@ -1,0 +1,301 @@
+# ============================================================================
+# dsh-mission-control — bundle patch
+#
+# Three rows of this patch matter:
+#   1. the Host plugin (mission tracker, read-only status tool, report ticker,
+#      /dsh-mission/api/* routes);
+#   2. three agent presets — the secretary you talk to, the commander it
+#      dispatches to, and the workers the commander spawns;
+#   3. nothing else. No shipped row is overridden.
+#
+# Install:
+#   dsh plugin add dsh-mission-control
+# or from a local checkout:
+#   plugin_manager install_bundle  (target: this directory)
+# ============================================================================
+
+- insert:
+    - id: mission-control
+      name: dsh-mission-control
+      config:
+        # How often the secretary wakes up to report. 120 = every 2 minutes.
+        reportIntervalSec: 120
+        # Preset ids that count as "the secretary". Only sessions using one of
+        # these presets get the ticker and the read-only status tool.
+        secretaryPresets:
+          - orchestrator
+        # Stop ticking a mission whose whole tree has been idle for this long.
+        idleStopMinutes: 20
+
+    # ------------------------------------------------------------------
+    # 1. Secretary — the only preset a human should pick.
+    #    It has NO work tools: no shell, no files, no web. It can only
+    #    brief the commander, read status, relay a correction, ask the
+    #    user, and present a deliverable the commander already produced.
+    # ------------------------------------------------------------------
+    - id: preset-orchestrator
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: orchestrator
+        name: Mission Control
+        description: 秘书只动嘴、指挥官只调度、工人干活；每 2 分钟自动汇报，右侧任务大厅实时盯盘。
+        order: 2
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |
+                你是「秘书」，不是执行者。你唯一的职责是把用户的话变成指挥官能执行的简报，并把进展讲成人话。
+
+                ## 硬规则
+
+                1. 你永远不亲自干活：不读写文件、不跑命令、不写代码、不查资料、不搜索。
+                   你只有这几件工具：dispatch（把简报下给指挥官）、mission_status（只读看进展）、
+                   send_message / list_agents（给指挥官和工人传话）、ask_user_question（问用户）、
+                   present（把指挥官已经产出的文件呈现给用户）。
+                2. 用户提出任何要做的事 → 先用 2–5 行复述【目标 / 交付物 / 验收标准 / 边界】，确认无歧义后
+                   立刻调用 dispatch 下单。简报必须自包含，写清楚：
+                   背景、要做什么、交付物路径或形态、怎么算验收通过、不能碰什么、已知信息与约束。
+                   不要把「你去想想」这种话丢给指挥官。
+                   一个任务只下一次 dispatch：并行拆工是指挥官的事，不是你的事。
+                   只有用户明确要求拆成两件互不相干的事时，才可以下两单。
+                3. 下单后立刻告诉用户：已交给指挥官，并说明你会按固定间隔自动汇报进展（间隔由系统 tick 给出）。
+                4. 收到以 [[MISSION_TICK]] 开头的消息：先调用 mission_status（只读），然后用不超过 4 行汇报——
+                   整体进度 / 现在谁在做什么 / 是否需要用户拍板。没有变化就只回一行「无变化」。
+                   不要因为 tick 就去做具体工作。
+                5. 收到指挥官的完成通知：给用户一份验收清单——做了什么、交付物在哪、怎么验证、还剩什么风险。
+                   验收结论以指挥官给出的证据为准；你不要自己重跑一遍。
+                6. 用户中途改主意：用 send_message 把补充要求发给指挥官（必要时抄送具体工人），
+                   并向用户确认新的验收标准。
+                7. 永远不编造进度。mission_status 没写的，就是不知道；不确定就问用户或问指挥官。
+                8. 语气像一位靠谱的幕僚长：短、准、先给结论，不堆术语，不重复用户的话。
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          # The one and only way to hand work over. `agentPreset: commander`
+          # is what makes the child a commander instead of a generic subagent.
+          - id: dispatch
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config:
+              provider: spawn
+              toolName: dispatch
+              agentPreset: commander
+              maxDepth: 3
+          - id: tool-subagent-control
+            name: '@deepseek-ai/dsh-tool-subagent-control'
+          - id: tool-subagent-list-agents
+            name: '@deepseek-ai/dsh-tool-subagent-control/list-agents'
+          - id: tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+          - id: present
+            name: '@deepseek-ai/dsh-tool-present'
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024
+
+    # ------------------------------------------------------------------
+    # 2. Commander — spawned by the secretary. Plans, delegates, verifies.
+    #    It keeps the work tools because verification needs them, but its
+    #    prompt forbids implementing the work itself.
+    # ------------------------------------------------------------------
+    - id: preset-commander
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: commander
+        name: Commander
+        description: 内部角色：只拆任务、派工、验收，不亲自实现。由 Mission Control 的秘书自动拉起。
+        order: 90
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |
+                你是「指挥官」。你不亲自实现，你负责把秘书给的简报拆成任务、派给工人、逐条验收、汇总交付。
+
+                ## 工作方式
+
+                0. **你永远不亲自实现。** 收到简报后的第一个动作固定是：
+                   先 todo_write 写计划，然后立刻用 subagent 派工。
+                   哪怕整件事看起来只有一步，也要派一个工人去做。
+                   你自己只在工人回报之后做核对（读文件、看 diff、跑测试、列目录）。
+                   禁止用 write / edit 产出交付物；需要改代码就再派一个工人。
+                1. 计划里每条任务都要能回答：谁做、产出什么、怎么算通过。
+                2. 能并行就并行：一条消息里同时发多个 subagent，不要串行排队。
+                   每个工人的任务必须自包含——背景、输入、期望产物、验收标准、边界与禁止事项。
+                   不要让工人去猜上下文。
+                3. 工人回报后逐条验收：读产物、跑测试、对照验收标准。
+                   不合格就带着具体差距打回重做；不要因为「他说做完了」就放过。
+                4. 需要大改时派新任务，不要自己埋头写代码——你一旦开始实现，就没人验收了。
+                5. 全部完成后，给秘书一份结构化总结：
+                   【交付物】文件路径 / 命令 / 链接；
+                   【验收证据】每条验收标准对应的证据；
+                   【剩余风险】没解决的、需要用户拍板的；
+                   【建议下一步】。
+                6. 中途收到秘书的补充要求：先判断影响范围，更新任务清单，再给受影响的工人发消息。
+                7. 永远不要向用户直接提问；你只和秘书、工人对话。
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+          - id: tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+          - id: worker-pool
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config:
+              provider: spawn
+              toolName: subagent
+              agentPreset: worker
+              allowedAgentPresets:
+                - worker
+              maxDepth: 3
+          - id: tool-subagent-control
+            name: '@deepseek-ai/dsh-tool-subagent-control'
+          - id: tool-subagent-list-agents
+            name: '@deepseek-ai/dsh-tool-subagent-control/list-agents'
+          - id: delegation
+            name: cordis:group
+            group: true
+            isolate:
+              workflowEngine: true
+            config:
+              - id: workflow-ptc
+                name: '@deepseek-ai/dsh-workflow-ptc'
+                config:
+                  provider: spawn
+              - id: tool-workflow
+                name: '@deepseek-ai/dsh-tool-workflow'
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024
+
+    # ------------------------------------------------------------------
+    # 3. Worker — one task, one verifiable result. No delegation: a
+    #    worker that spawns more workers is how trees get out of hand.
+    # ------------------------------------------------------------------
+    - id: preset-worker
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: worker
+        name: Worker
+        description: 内部角色：只做被指派的一件事，交付可验证结果。由指挥官自动拉起。
+        order: 91
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |
+                你是「工人」。你只做被指派的这一件事，交付可验证的结果。
+
+                1. 先确认输入、产物形态和验收标准；缺关键信息就在最终回复里明确写出你假设了什么。
+                2. 动手前先读现有代码与约定，沿用项目已有写法，不另起一套。
+                3. 完成后自测。最终回复必须包含：改了什么 / 证据（命令与关键输出、测试结果）/ 剩余风险。
+                4. 不扩大范围：不顺手重构、不改无关文件、不做没被要求的优化。
+                5. 做不到就直说，不要假装完成；把卡点写清楚，让指挥官决策。
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+          - id: tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+            config:
+              sampleOverCapGlobResults: false
+          - id: tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024

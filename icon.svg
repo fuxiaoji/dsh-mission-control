@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Mission Control">
+  <defs>
+    <linearGradient id="mc-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1220"/>
+      <stop offset="1" stop-color="#131C33"/>
+    </linearGradient>
+    <linearGradient id="mc-line" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4D6BFE"/>
+      <stop offset="1" stop-color="#7CE7FF"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="124" height="124" rx="28" fill="url(#mc-bg)"/>
+  <g fill="none" stroke="url(#mc-line)" stroke-linecap="round">
+    <circle cx="64" cy="60" r="34" stroke-opacity="0.22" stroke-width="1.5"/>
+    <circle cx="64" cy="60" r="23" stroke-opacity="0.4" stroke-width="1.5"/>
+    <path d="M64 60 L64 26" stroke-opacity="0.55" stroke-width="2"/>
+    <path d="M64 60 L34 78" stroke-opacity="0.55" stroke-width="2"/>
+    <path d="M64 60 L94 82" stroke-opacity="0.55" stroke-width="2"/>
+  </g>
+  <circle cx="64" cy="60" r="7.5" fill="#4D6BFE"/>
+  <circle cx="64" cy="60" r="12" fill="#4D6BFE" fill-opacity="0.18"/>
+  <circle cx="34" cy="78" r="4.6" fill="#7CE7FF"/>
+  <circle cx="94" cy="82" r="4.6" fill="#7CE7FF"/>
+  <circle cx="64" cy="26" r="5" fill="#FFFFFF"/>
+  <path d="M22 104 H106" stroke="#4D6BFE" stroke-opacity="0.35" stroke-width="2" stroke-linecap="round"/>
+</svg>
