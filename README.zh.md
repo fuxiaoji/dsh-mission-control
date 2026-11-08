@@ -22,6 +22,10 @@
 
 <p align="center"><sub>真实运行截图：指挥官、两个并行工人、用时，以及时间线里两次自动汇报。</sub></p>
 
+<p align="center"><img src="docs/assets/demo.gif" width="820" alt="任务大厅演示" /></p>
+
+<p align="center"><sub>真实任务的延时录屏：秘书下单、指挥官拉起两个并行工人、第一次自动汇报到达。</sub></p>
+
 ---
 
 ## 它解决什么问题

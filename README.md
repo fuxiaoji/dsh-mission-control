@@ -22,6 +22,10 @@
 
 <p align="center"><sub>A real mission: the board shows the commander, two parallel workers, the elapsed time and two automatic briefs in the timeline.</sub></p>
 
+<p align="center"><img src="docs/assets/demo.gif" width="820" alt="Mission Control demo" /></p>
+
+<p align="center"><sub>Time-lapse of a real mission: the secretary dispatches, the commander starts two parallel workers, the first automatic brief lands.</sub></p>
+
 ---
 
 ## The problem
